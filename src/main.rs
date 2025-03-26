@@ -14,6 +14,12 @@ pub struct Editor {
     pub exit_requested: bool,
 }
 
+impl Default for Editor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Editor {
     pub fn new() -> Self {
         Self {

@@ -1,5 +1,4 @@
 use core::slice::Iter;
-use std::io::Cursor;
 
 use crate::action::Action;
 
@@ -124,15 +123,11 @@ impl Parser {
                     match (line_number, column_number) {
                         (Some(_line), Some(_column)) => {
                             if let Err(e) = _line {
-                                return Err(ParserError::InvalidArgument(String::from(
-                                    e.to_string(),
-                                )));
+                                return Err(ParserError::InvalidArgument(e.to_string()));
                             }
 
                             if let Err(e) = _column {
-                                return Err(ParserError::InvalidArgument(String::from(
-                                    e.to_string(),
-                                )));
+                                return Err(ParserError::InvalidArgument(e.to_string()));
                             }
 
                             let (line, column) = (_line.unwrap(), _column.unwrap());
