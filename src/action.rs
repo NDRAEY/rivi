@@ -14,6 +14,8 @@ pub enum Action {
     Insert(String),   // Content,
     InsertLineBelow,
     InsertLineAbove,
+    RemoveCharLeft,
+    RemoveCharRight,
     ReplaceCurrentLine(String),    // Content
     Load(String),    // File path
     SaveCurrentFile,

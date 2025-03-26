@@ -1,12 +1,18 @@
-use crate::{action::Action, Editor};
+use crate::{Editor, action::Action};
 
 pub fn show_help() {
     let entries: &[(&[&str], &str)] = &[
         (&["exit"], "Exit the program."),
         (&["help"], "Show this help message."),
-        (&["l [filename]", "load [filename]"], "Load a file from the disk."),
+        (
+            &["l [filename]", "load [filename]"],
+            "Load a file from the disk.",
+        ),
         (&["s", "save"], "Save the current file to the disk."),
-        (&["s [filename]", "save [filename]"], "Save data at specified path to the disk."),
+        (
+            &["s [filename]", "save [filename]"],
+            "Save data at specified path to the disk.",
+        ),
         (&["show"], "Show the entire file."),
         (&["showline"], "Show the current line."),
         (&["v="], "Insert a line below the current one."),
@@ -19,6 +25,8 @@ pub fn show_help() {
         (&["i"], "Moves cursor right"),
         (&["o"], "Moves cursor up"),
         (&["p"], "Moves cursor down"),
+        (&["d"], "Backspace (Removes left character)"),
+        (&["dr"], "Delete (Removes right character)"),
     ];
 
     let longest_command_length = {
@@ -50,29 +58,38 @@ pub fn execute(commands: Vec<Action>, editor: &mut Editor) -> Result<(), String>
         match i {
             Action::Exit => {
                 editor.exit_requested = true;
-            },
+            }
             Action::Load(path) => {
                 if let Err(e) = editor.load_file(path) {
                     return Err(e.to_string());
                 }
-            },
+            }
             Action::ReplaceCurrentLine(text) => {
                 editor.editor.delete_line();
                 editor.editor.insert_str(&text);
-            },
+            }
             Action::Save(path) => {
                 editor.save_file_as(&path);
-            },
+            }
             Action::SaveCurrentFile => {
                 editor.save_file();
-            },
+            }
             Action::Show => {
                 let lines: Vec<&str> = editor.editor.text().split("\n").collect();
                 let lines_count = lines.len();
                 let digit_length = format!("{}", lines_count).len();
 
                 for (i, line) in lines.iter().enumerate() {
-                    print!("{:>width$} | ", i + 1, width = digit_length);
+                    print!(
+                        "{} {:>width$} | ",
+                        if editor.editor.cursor().y == i {
+                            ">>>"
+                        } else {
+                            "   "
+                        },
+                        i + 1,
+                        width = digit_length
+                    );
                     println!("{}", line);
                 }
             }
@@ -81,9 +98,9 @@ pub fn execute(commands: Vec<Action>, editor: &mut Editor) -> Result<(), String>
                 let digit_length = format!("{}", line_nr).len();
 
                 println!("{} | {}", line_nr, editor.editor.get_line_at_cursor());
-                
+
                 let offset = editor.editor.cursor().x;
-                
+
                 println!("{}^", str::repeat(" ", offset + digit_length + 3));
             }
             Action::InsertLineBelow => {
@@ -118,7 +135,16 @@ pub fn execute(commands: Vec<Action>, editor: &mut Editor) -> Result<(), String>
                 editor.editor.move_to_line_end();
             }
             Action::Help => show_help(),
-            _ => todo!("Implement {:?}", i)
+            Action::Insert(str) => {
+                editor.editor.insert_str(&str);
+            }
+            Action::RemoveCharLeft => {
+                editor.editor.delete_char_left();
+            }
+            Action::RemoveCharRight => {
+                editor.editor.delete_char_right();
+            }
+            _ => todo!("Implement {:?}", i),
         }
     }
 

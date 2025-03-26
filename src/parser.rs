@@ -9,7 +9,7 @@ pub struct Parser;
 pub enum ParserError {
     UnexpectedCommand(String),
     TooFewArguments(String),
-    InvalidArgument(String)
+    InvalidArgument(String),
 }
 
 impl Parser {
@@ -124,16 +124,20 @@ impl Parser {
                     match (line_number, column_number) {
                         (Some(_line), Some(_column)) => {
                             if let Err(e) = _line {
-                                return Err(ParserError::InvalidArgument(String::from(e.to_string())));
+                                return Err(ParserError::InvalidArgument(String::from(
+                                    e.to_string(),
+                                )));
                             }
 
                             if let Err(e) = _column {
-                                return Err(ParserError::InvalidArgument(String::from(e.to_string())));
+                                return Err(ParserError::InvalidArgument(String::from(
+                                    e.to_string(),
+                                )));
                             }
 
                             let (line, column) = (_line.unwrap(), _column.unwrap());
-                            
-                            actions.push(Action::MoveTo{ line, column });
+
+                            actions.push(Action::MoveTo { line, column });
                         }
                         _ => return Err(ParserError::TooFewArguments(String::from(*i))),
                     }
@@ -148,10 +152,32 @@ impl Parser {
                         "i" => Some(Action::MoveRight),
                         "o" => Some(Action::MoveUp),
                         "p" => Some(Action::MoveDown),
-                        _ => None
-                    }.unwrap();
+                        _ => None,
+                    }
+                    .unwrap();
 
                     actions.push(direction);
+                }
+                "d" => {
+                    actions.push(Action::RemoveCharLeft);
+                }
+                "dr" => {
+                    actions.push(Action::RemoveCharRight);
+                }
+                "ln" => {
+                    let line_number = parts_iter.next().map(|x| x.parse::<usize>());
+
+                    match line_number {
+                        Some(line) => match line {
+                            Ok(line) => {
+                                actions.push(Action::MoveTo { line, column: 0 });
+                            }
+                            Err(e) => return Err(ParserError::InvalidArgument(e.to_string())),
+                        },
+                        None => return Err(ParserError::TooFewArguments(String::from(*i))),
+                    }
+
+                    actions.push(Action::RemoveCharRight);
                 }
                 _ => {
                     return Err(ParserError::UnexpectedCommand(String::from(*i)));
