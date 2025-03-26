@@ -1,0 +1,7 @@
+[package]
+name = "rivi"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+text_editor_foundation = { git = "https://github.com/NDRAEY/text_editor_foundation", version = "0.1.0" }
